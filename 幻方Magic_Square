@@ -1,0 +1,66 @@
+#include<stdio.h>
+#include<stdbool.h>
+#define N 99
+void square_put(int n);
+int main() {
+	printf("This program creates a magic square of a specified size.\n");
+	printf("This size must be an odd number between 1 and 99.\n");
+	restart:
+	printf("Enter size of magic square:");
+	int num;
+	scanf_s("%d", &num);
+	if (num % 2 == 0) {                    //必须是奇数的，否则重新开始输入
+		printf("Enter an odd number!\n");
+		goto restart;
+	}
+	square_put(num);
+	getchar();
+	getchar();
+	return 0;
+}
+
+void square_put(int n) {
+	int square[N][N] = { 0 };                            //初始化
+	bool check[N][N] = { false };                      //检查是否出现过
+	int sum = 1;
+	int row = 0, column = (n - 1) / 2;
+	for (; sum <= n*n; sum++) {
+
+
+		//可以先检查是否重复，如果重复了操作后再赋值。
+
+
+		if (check[row][column] == true) {                //已经存在     
+			if (row + 2 < n)                            //未越界向下移动2 
+				row += 2;
+			else                                       //越界，向上移动
+				row = row + 2 - n;
+
+			if (column - 1 >= 0)                      //向左未越界(不会向右移)
+				column -= 1;                          //直接减去1左移
+			else                                        //向左越界，应该变为最后一列
+				column = n-1;
+		}
+
+
+		square[row][column] = sum;
+		check[row][column] = true;                   //记下已经出现过的位置
+		if (row - 1 < 0)                              //向上移动越界
+			row = n-1;                                  //变为最后一行
+		else                                            //未越界
+			row -= 1;                              //向上移动一行
+		if (column + 1 >= n)                           //向左移动越界
+			column = 0;                              //变为第一行
+		else                                            //向左移动不越界
+			column += 1;                              //直接左移加一
+
+		//实现了向上移一位，向右移一位，且不会越界。
+
+
+	}
+	for (int i = 0; i<n; i++) {     //输出数组
+		for (int k = 0; k<n; k++)
+			printf("%4d", square[i][k]);
+		printf("\n");
+	}
+}
