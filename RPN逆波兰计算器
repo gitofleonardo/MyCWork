@@ -1,0 +1,112 @@
+/*****************************************\
+ *            RPN Calculator             *
+ *                                       *
+ *             Using Stack               *
+ *                                       *
+ *    You need to put all operators      *
+ *           behind operands             *
+ *                                       *
+\******************************************/
+
+//下面注释所提到的初始化就是将0赋值给要初始化的变量\\
+
+#include<stdio.h>
+#include<stdbool.h>
+#define Stack_size 100
+
+float contents[Stack_size];          //定义全局变量的数组
+int top = 0;                         //初始化栈顶
+float result = 0;                    //初始化计算结果
+
+bool is_full();
+bool is_empty();
+void make_empty(void);
+void push(int i);
+void pop(char i);
+void contents_empty();
+
+int main() {
+		char in;           //输入的数据
+		float change;
+		for (;;) {
+			if (top == 0)
+				printf("Enter an RPN expression(Enter q to quit.):\n");
+			scanf("%c",&in);          //输入
+			while (getchar() != '\n');            //过滤掉回车键（换行符）
+			if (in == 'q') {                      //输入q退出
+				printf("Program ends.\n");
+				break;
+			}
+
+			if (in == '=') {                       //等于号时输出计算结果
+				printf("The value of expression:%.2f\n", contents[--top]);
+				make_empty();                  //输出结果后初始化栈顶
+				contents_empty();                   //输出后初始化数组第一个元素
+			}
+			if (in >= '0' && in <= '9') {             //将字符类型的数转换为浮点型的数
+				change = (float)in - 48;
+				push(change);                         //将数据压入栈中
+			}
+			else
+				pop(in);                             //计算函数
+		}
+	getchar();
+	return 0;
+}
+
+bool is_full() {
+	return top == Stack_size;             //判断是否溢出
+}
+bool is_empty() {
+	return top == 1;           //判断是否只剩下一个操作数
+}
+void make_empty(void){                    //将top指向的数组元素初始化
+	top = 0;
+}
+void contents_empty() {                   //初始化已经操作过的操作数
+	contents[top] = 0;
+}
+void push(int i) {                          //将输入的数据存进数组中
+	if (is_full())
+		printf("Expression is too complex.\n");           //溢出就报错
+	else
+		contents[top++] = i;                                //经过这一步后，top指向的元素不是存进去的当时的数，而是指向了下一个数，即初始化的值
+}
+void pop(char in) {
+	if (is_empty()) {                      //如果只剩下一个操作数，但是还有一个或者多个运算符的时候，就报错
+		printf("No enough operands in expression.\n");
+		return;
+	}
+	switch (in) {
+	case '+':
+		result = contents[top-2] + contents[top-1];          //将之前压进栈的两个数进行运算，以下相同，不再注释
+		top--;                                               //top自减1，为的是指向最后一个压进栈的元素
+		contents[top-1] = result;                           //将计算结果压进栈中
+		contents_empty();                                   //将最后一个压进栈的操作数初始化
+		break;
+		
+	case '-':
+		result = contents[top - 2] - contents[top-1];                   //**********************************//
+		top--;                                                          // *              下同             *//
+		contents[top - 1] = result;                                     //**********************************//    
+		contents_empty();
+		break;
+	case '*':
+		result = contents[top - 2] * contents[top - 1];
+		top--;
+		contents[top - 1] = result;
+		contents_empty();
+		break;
+	case '/':
+		if (contents[top - 1] == 0) {
+			printf("Illegal Value Of Denominator!\n");              //注意，分母不能为0！！
+			make_empty();                                           //初始化栈顶
+			break;
+		}
+		result = (float)contents[top - 2] / contents[top - 1];
+		top--;
+		contents[top - 1] = result;
+		contents_empty();
+		break;
+	}
+}
