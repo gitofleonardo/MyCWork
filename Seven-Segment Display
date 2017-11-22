@@ -1,0 +1,100 @@
+      /*************************************\
+       *          The  Analog              *        Model:     0
+       *                                   *                 ------
+       *      Seven-segment display        *              5 |      |1
+       *                                   *                |__6___|
+       *     Enter a number and display    *               4|      |
+       *  it in the Seven-segment display  *                |______|2
+       *     By                            *                    3
+       *        黄承喜                      *
+      \*************************************/
+
+#include<stdio.h>
+#include<stdbool.h>
+#define MAX_DIGITS 10     //最大存储数为十位数
+
+char digits[3][MAX_DIGITS * 4];     //因为要加上空格，所以总共有4*MAX_DIGITS列字符
+const int segments[10][7] = {      //这是七段显示器对应的打开和关闭状态（以1为开启状态，0为关闭状态）
+{1,1,1,1,1,1,0},
+{0,1,1,0,0,0,0},
+{1,1,0,1,1,0,1},
+{1,1,1,1,0,0,1},
+{0,1,1,0,0,1,1},
+{1,0,1,1,0,1,1},
+{1,0,1,1,1,1,1},
+{1,1,1,0,0,0,0},
+{1,1,1,1,1,1,1},
+{1,1,1,1,0,1,1} 
+};
+
+void clear_digits_array();
+void process_digit(int digit,int position);
+void print_digits_array();
+bool is_print(int a,int b);
+
+int main() {
+	clear_digits_array();               //先将数组内的元素清空
+
+	char in;
+	int change;
+	int position = 1;                     //这是对应的数字的排名
+
+	printf("Enter a number:\n");
+	in = getchar();                       //获取字符类型的数字
+	while (in != '\n') {
+		if (in<'0' || in>'9')             //当不是0到9中的任何一个数字的时候就会读取下一个数字
+			in = getchar();
+		change = (int)in - 48;             //将字符类型的数字转换为整数类型的数字
+		process_digit(change, position);
+		position++;                        //排名往后移
+		if (position > MAX_DIGITS)         //当输入的数字超过最大支持的位数的时候，就会终止循环
+			break;
+		in = getchar();                   //读取下一个
+	}
+	print_digits_array();
+	getchar();
+	getchar();
+	return 0;
+}
+
+bool is_print(int a,int b) {
+	return segments[a][b] == 1;           //判断开关状态
+}
+
+void clear_digits_array() {
+	digits[3][MAX_DIGITS * 4] = {' '};     //清空数组
+}
+
+void process_digit(int digit,int position) {
+	int i = 0;
+
+	if (is_print(digit, i))                         //当一号段对应为开（1）时，存入对应的段（下同）
+		digits[0][4*position-3] = '_';	
+	i++;
+	if (is_print(digit, i))
+		digits[1][4*position-2] = '|';
+	i++;
+	if (is_print(digit, i))
+		digits[2][4*position-2] = '|';
+	i++;
+	if (is_print(digit, i))
+		digits[2][4 * position - 3] = '_';
+	i++;
+	if (is_print(digit, i))
+		digits[2][4 * position - 4] = '|';
+	i++;
+	if (is_print(digit, i))
+		digits[1][4 * position - 4] = '|';
+	i++;
+	if (is_print(digit, i))
+		digits[1][4 * position - 3] = '_';
+
+}
+
+void print_digits_array() {                       //输出七段显示器结果
+	for (int i = 0; i < 3; i++) {
+		for (int k = 0; k < MAX_DIGITS*4; k++)
+			printf("%c", digits[i][k]);
+		printf("\n");
+	}
+}
