@@ -1,0 +1,36 @@
+#include<stdio.h>
+#define MAX_MES 100
+int main() {
+	printf("Enter a massage:\n");
+	char array[MAX_MES] = { '\0' };
+	char mes;
+	int top = 0;
+	mes = getchar();
+	while (mes != '\n') {                                           //核心技术
+		if (mes > 'A' && mes < 'Z')
+			mes += 32;
+		while ((mes<'a' || mes>'z') && mes!='\n')                   //当不属于a到z的任何一个字母时，就会读取下一个；而且要记得，最后一个总会是回车符，如果这时候再循环时，
+			mes = getchar();                                        //下一个就不会有字符读取了，此时程序会要求用户输入（当然屏幕上不会有提示），所以要确保读取的不是回车符时才执行
+		if (mes<'a' || mes>'z')
+			break;
+		array[top++] = mes;
+		mes = getchar();
+	}
+	top--;                            //因为之前已经自增了1了，现在top指向的元素是空的什么也没有，所以要先自减
+	char *p1=array,*p2=&array[top];
+	for (;;) {
+		if (*p1!=*p2) {       //当有任何一个不相等的时候就不会是回文
+			printf("Not a palindrome.");
+			break;
+		}
+		else {
+			printf("Palindrome.");
+			break;
+		}
+		*p1++;
+		*p2--;
+	}
+	getchar();
+	getchar();
+	return 0;
+}
