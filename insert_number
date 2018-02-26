@@ -1,0 +1,39 @@
+#include<stdio.h>
+#define N 10
+void insert(int *p,int in);
+int main (){
+	int array[N]={2,12,25,28,32,41,45,49,89,155};
+	int store[N+1]={2,12,25,28,32,41,45,49,89,155};
+	int input;
+	int *pTos=store;
+	for (int i=0;i<N;i++)
+	printf("%4d",array[i]);
+	printf("Enter a digit you want to insert:");
+	scanf("%d",&input);
+	insert(store,input);
+	for (int i=0;i<N+1;i++)
+	printf("%4d",store[i]);
+	
+	getchar();
+	getchar();
+	return 0;
+} 
+void insert(int *p,int in){
+		int *pTemp,times=0;
+	for (int i=0;i<N;i++){
+		if (in>*p)
+		times++;
+		p++;
+		continue;
+		break;
+		}
+		p++;
+		pTemp=p;
+		*p=in;
+		p++;
+		for (int i=times+1;i<N;i++){
+			pTemp=p;
+			*p=*pTemp;
+			p++;
+		}
+}
