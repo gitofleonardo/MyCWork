@@ -1,0 +1,299 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<stdbool.h>
+
+#define MAX_NAME 50                       //学生名字拼音的最大字数 
+#define NUM 20                            //学号的最大字数 
+
+void swap(int *a, int *b);
+
+struct stu *partion(struct stu *pBegin, struct stu *pEnd);
+
+void quick_sort(struct stu *pBegin, struct stu *pEnd);    //快速排序
+
+struct stu *sort(struct stu *head);
+
+struct stu *Add(struct stu *p);            //添加新成绩 
+
+struct stu *Update(struct stu *p1,char *numb);         //更新学生信息 
+
+struct stu *sort(struct stu *p);    //排序
+
+int cal_sum(struct stu *p);
+
+void printout(struct stu *p);                 //输出为txt文件
+
+void Search(struct stu *p, char num[NUM]);      //搜索指定的学生信息 
+
+void Display(struct stu *p);                  //打印全部学生信息 
+
+void Read_name(char *p);                      //读取姓名 
+
+void Read_num(char *p);                 //读取学号信息 
+
+bool does_exist(struct stu *p, char num[NUM]);//判断学生信息是否已经存????????? 
+
+struct stu {
+	int junli, sixiu, math, C, dianmo, English, sum;
+	char stu_name[MAX_NAME];
+	char number[NUM];
+	struct stu *next;
+};
+	struct stu *temp = NULL;
+
+                             //这里才是主函数
+int main() {
+	printf("\n");
+	printf("                  *************           ***************         ***              **\n");
+	printf("                  *************           ***************         ***              **\n");
+	printf("                  **                      **                      ***              **\n");
+	printf("                  **                      **                      ***              **\n");
+	printf("                  **                      ***************         ***              **\n");
+	printf("                  **                                   **         ***              **\n");
+	printf("                  *************           ***************         *******************\n");
+	printf("                  *************           ***************         *******************\n");
+	printf("\n");
+	printf("          ************************************************************************************\n");
+	printf("          ************************************************************************************\n");
+	printf("          *                     CSU   Students  Management   System                          *\n");
+	printf("          ************************************************************************************\n");
+	printf("          ************************************************************************************\n");
+	printf("          *                1.Add   2.Search   3.Display   4.Print   5.Exit                   *\n");
+	printf("          ************************************************************************************\n");
+
+	int choose;
+	char num[NUM] = { '\0' };    //待以后输入学生学号的临时存储数组 
+
+RESTART:     //返回重新选择 
+	printf("          Please Select Operation:");
+	scanf("%d", &choose);
+	while (getchar() != '\n');     //过滤掉上次scanf留下的回车符 
+
+
+	switch (choose) {
+	case 1:    //添加学生信息
+
+		temp = Add(temp);
+		break;
+	case 2:      //搜索学生信息
+
+		if (temp == NULL) {
+			printf("          No information.\n");
+			break;
+		}
+		printf("          Enter number of the student:");
+		Read_name(num);
+
+		Search(temp, num);      //搜索并输出学生信息 
+
+		break;
+	case 3:         //展示全部信息
+
+		if (temp == NULL) {
+			printf("          No information.\n");
+			break;
+		}
+		Display(temp);     //展示全部的学生信息 
+
+		break;
+	case 4:
+		if (temp == NULL) {
+			printf("          No information.\n");
+			break;
+		}
+		printout(temp);   //输出为文件
+
+		break;
+	case 5:
+		goto END;   //跑去了main函数的末尾！！
+	default:
+		printf("          Operation not found!\n");
+		goto RESTART;     //主函数不长，可以考虑用goto使代码看起来整洁 
+		break;
+	}
+	goto RESTART;  //跑去了main函数的开始部分！！！
+END:
+	printf("\n          Thank you for using CSU Students Information Management Sytstem!Hava a good day!");
+	getchar();
+
+	return 0;
+}
+
+
+void Read_name(char *p) {     //读取学生的姓名
+	int i;
+	*p = getchar();
+	for (i = 0; *p != '\n' && i<MAX_NAME - 1; i++, p++, *p = getchar()) {      //当没有超过字数限制的时候就一直往下读取，直到遇见换行符   下同 
+	}
+	for (; i < MAX_NAME; i++, p++) {
+		*p = '\0';
+	}
+}
+
+void Read_num(char *p) {      //读取学生学号信息
+	int i;
+	*p = getchar();
+	for (i = 0; *p != '\n' && i<NUM - 1; i++) {
+		p++;
+		*p = getchar();
+	}
+	for (; i < NUM; i++) {
+		*p = '\0';
+		p++;
+	}
+}
+
+int cal_sum(struct stu *p) {
+	return p->junli + p->sixiu + p->math + p->C + p->dianmo + p->English;
+}
+
+
+bool does_exist(struct stu *p, char num[NUM]) {      //输入学生信息时如果输入的学生学号已经存在，则提示用户以存在，可以尝试更新学生信息选项 
+	struct stu *sear;
+	for (sear = p; sear != NULL; sear = sear->next) {
+		if (strcmp(sear->number, num) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+struct stu *Add(struct stu *p) {
+
+	struct stu *new_stu;      //建立一个新的学生结构体 
+	new_stu = (struct stu *)malloc(sizeof(struct stu));
+
+	if (new_stu == NULL) {
+		printf("          Failure:Failed to add new infomation!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("          Enter name:");
+	Read_name(new_stu->stu_name);
+	printf("          Enter number:");
+	Read_num(new_stu->number);
+
+	if (does_exist(p, new_stu->number)) {
+		printf("          Student information already exists,try it again or Update?\n");
+		return p;
+	}
+
+	printf("          Enter junli Score:");
+	scanf("%d", &(new_stu->junli));
+    	if(new_stu->junli>100)
+	printf("          Are you sure?\n");
+	
+	printf("          Enter sixiu score:");
+	scanf("%d", &(new_stu->sixiu));
+		if(new_stu->sixiu>100)
+	printf("          Are you sure?\n");
+	
+	printf("          Enter math score:");
+	scanf("%d", &(new_stu->math));
+		if(new_stu->math>100)
+	printf("          Are you sure?\n");
+	
+	printf("          Enter C score:");
+	scanf("%d", &(new_stu->C));
+		if(new_stu->C>100)
+	printf("          Are you sure?\n");
+	
+	printf("          Enter dianmo score:");
+	scanf("%d", &(new_stu->dianmo));
+		if(new_stu->dianmo>100)
+	printf("          Are you sure?\n");
+	
+	printf("          Enter English score:");
+	scanf("%d", &(new_stu->English));
+		if(new_stu->English>100)
+	printf("          Are you sure?\n");
+
+	new_stu->sum = cal_sum(new_stu);
+
+	new_stu->next = p;
+
+	return new_stu;
+
+}
+
+
+void Search(struct stu *p, char num[NUM]) {
+
+	if (p == NULL) {
+		printf("          No information.\n");
+		return;
+	}
+	for (; p != NULL; p = p->next) {
+		if (strcmp(p->number, num) == 0) {
+			printf("          Student information:\n");
+			printf("          name\t\tnumber\t\tTotal score:\tjunli\tsixiu\tmath\tC\tdianmo\tEnglish\n\n");
+			printf("          %s\t%s\t%d\t\t%d\t%d\t%d\t%d\t%d\t%d\n\n", p->stu_name, p->number, p->sum, p->junli, p->sixiu, p->math, p->C, p->dianmo, p->English);
+			return;
+		}
+	}
+	printf("          Student information does not exist!\n");
+	return;
+}
+
+void Display(struct stu *p) {
+
+	p=sort(p);
+
+	printf("          Student information:\n");
+	printf("          name\t\tnumber\t\tTotal score:\tjunli\tsixiu\tmath\tC\tdianmo\tEnglish\n\n");
+	for (; p != NULL; p = p->next) {
+		printf("          %s\t%s\t%d\t\t%d\t%d\t%d\t%d\t%d\t%d\n\n", p->stu_name, p->number, p->sum, p->junli, p->sixiu, p->math, p->C, p->dianmo, p->English);
+	}
+}
+
+void printout(struct stu *p) {
+
+	p = sort(p);
+
+	FILE *new_file;    //新的文件指针
+	if ((new_file = fopen("d:\\Scores.txt", "w")) == NULL) {
+		printf("          Cannot create a new file.\n");
+		return;
+	}
+	fprintf(new_file, "Student information:\n\n");
+	fprintf(new_file, "name\t\tnumber\t\tTotal score:\tjunli\tsixiu\tmath\tC\tdianmo\tEnglish\n\n");
+	for (; p != NULL; p = p->next) {
+		fprintf(new_file, "%s\t%s\t%d\t\t%d\t%d\t%d\t%d\t%d\t%d\n\n", p->stu_name, p->number, p->sum, p->junli, p->sixiu, p->math, p->C, p->dianmo, p->English);
+	}
+	fclose(new_file);
+	printf("\n          File saved successfully.Find it at D:\\Scores.txt\n");    //保存到D盘的Scores.txt文件里
+}
+
+        //网上找的快排
+
+void swap(int *a, int *b) {
+	int t = *a;
+	*a = *b;
+	*b = t;
+}
+struct stu *partion(struct stu *pBegin, struct stu *pEnd) {
+	if (pBegin == pEnd || pBegin->next == pEnd)    return pBegin;
+	int key = pBegin->sum;    //选择pBegin作为基准元素
+	struct stu *p = pBegin, *q = pBegin;
+	while (q != pEnd) {   //从pBegin开始向后进行一次遍历
+		if (q->sum > key) {
+			p = p->next;
+			swap(&p->sum, &q->sum);
+		}
+		q = q->next;
+	}
+	swap(&p->sum, &pBegin->sum);
+	return p;
+}
+void quick_sort(struct stu *pBegin, struct stu *pEnd) {
+	if (pBegin == pEnd || pBegin->next == pEnd)    return;
+	struct stu *mid = partion(pBegin, pEnd);
+	quick_sort(pBegin, mid);
+	quick_sort(mid->next, pEnd);
+}
+struct stu *sort(struct stu *head) {
+	if (head == NULL || head->next == NULL)    return head;
+	quick_sort(head, NULL);
+	return head;
+}
