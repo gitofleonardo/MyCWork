@@ -1,0 +1,68 @@
+#include<stdio.h>
+#include<stdbool.h>
+#include<stdlib.h>
+#include<time.h> 
+int roll_dice();
+bool play_game(); 
+void you_roll();
+int main (){
+	char choice;
+	restart:
+		roll_dice();
+		if (play_game())
+		printf("You win!\n");
+		else
+		printf("You lose!\n");
+		choose:
+		printf("Play again?\n");
+		choice=getchar();
+		while (getchar()!='\n')
+		;
+		if (choice=='Y' || choice=='y')
+		goto restart;
+		else if (choice=='n' || choice=='N');
+		else{
+		printf("Choose the right type!\n");
+		goto choose;
+	}
+		return 0;
+}
+
+int roll_dice(){
+	srand((unsigned) time(NULL));
+	int dice1,dice2;
+	dice1=rand()%7;
+	dice2=rand()%7;
+	return dice1+dice2;
+}
+
+void you_roll(int n){
+	printf("You rolled:%d\n",n);
+}
+
+bool play_game(){
+	int store; 
+	int result=roll_dice();
+	you_roll(result);
+	if (result==7 || result==11)
+	return true;
+	else if (result==2 || result==3 || result==12){
+	printf("Your point is:%d\n",result);
+	return false;
+	}
+
+	else{
+		printf("Your point is:%d\n",result);
+		store=result;
+		result=roll_dice();    //当不属于上面任意一种情况的时候，即“目标”，再掷一次色子 
+		while (result!=7){           //当不等于7的时候（掷7会输），如果等于“目标”，就会赢，否则再掷一次       如果等于7，跳出循环，下一步 
+		if (result==store){
+		you_roll(result);
+		return true;
+		}
+		store=result;	
+		result=roll_dice();
+	}
+		return false;           //结果等于7，输掉比赛 
+	}
+}
