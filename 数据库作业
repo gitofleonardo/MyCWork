@@ -1,0 +1,301 @@
+#include<stdio.h>
+#include<iostream>
+#include<string>
+#include<cstdlib>
+#include<cstdbool>
+#include<fstream>
+
+using std::string;
+using std::endl;
+
+#define MAX_NAME 50
+#define NUM 20
+
+
+struct Stu *Add_Stu();    //新增学生信息
+struct Course *Add_Course();   //新增课程
+struct Stu *Update();     //更新学生信息
+int Search();    //查找学生成绩
+void Printout();   //输出到文件
+void Display();     //展示全部信息
+void Exit();     //退出
+
+struct Stu {
+	string class_number;
+	string s_name;
+	string s_NO;
+	struct Stu *next;
+	struct Gra *point;
+};
+
+struct Course {
+	string c_NO;
+	string c_name;
+	struct Course *next;
+};
+
+struct Gra {
+	string s_NO;
+	string c_name;
+	string c_NO;
+	int Grade;
+	struct Gra *next;
+};
+
+struct Stu *Stu_first = NULL;
+struct Course *Course_first = NULL;
+struct Gra *Grade_first = NULL;
+
+int main() {
+	printf("Student Information Management System\n");
+
+RESTART:
+	printf("1.Add Stu 2.Add Course 3.Search 4.Display 5.Print 6.Update 7.Exit :");
+
+	int choice;
+	string num;
+
+	scanf("%d", &choice);
+
+	while (getchar() != '\n');
+
+	switch (choice) {
+	case 1:
+		Add_Stu();
+		break;
+	case 4:
+		if (Stu_first == NULL) {
+			printf("No information found!\n");
+			break;
+		}
+		Display();
+
+		break;
+	case 3:
+		if (Stu_first == NULL) {
+			printf("No information found!\n");
+			break;
+		}
+		Search();
+		break;
+	case 5:
+		if (Stu_first == NULL) {
+			printf("No information found!\n");
+			break;
+		}
+		Printout();
+		break;
+	case 6:
+		if (Stu_first == NULL) {
+			printf("No information found!\n");
+			break;
+		}
+		Update();
+		break;
+	case 2:
+		Add_Course();
+		break;
+	case 7:
+		Exit();
+	default:
+		printf("Code Incorrect!\n");
+		printf("\t\t\t请收起你大胆的想法\n");
+		goto RESTART;
+		break;
+	}
+	goto RESTART;
+}
+
+void Exit() {
+	exit(0);
+}
+
+struct Stu *Add_Stu() {
+	if (Course_first == NULL) {
+		printf("You must at least add a course!\n");
+		return NULL;
+	}
+
+	struct Stu *new_stu = new struct Stu;
+	new_stu->point = NULL;
+
+	if (new_stu == NULL) {
+		printf("Fatal error:Failed to malloc!\n");
+		Exit();
+	}
+
+	printf("Enter student's name:");
+	std::cin >> new_stu->s_name;
+
+	printf("Enter student's number:");
+	std::cin >> new_stu->s_NO;
+
+	printf("Enter student's class:"); 
+	std::cin >> new_stu->class_number;
+
+	Course *temp_course_head = Course_first;
+
+	for (; Course_first != NULL; Course_first = Course_first->next) {
+
+		struct Gra *new_grade = new struct Gra;
+
+		std::cout << "Enter " << Course_first->c_name << " grade:";
+		std::cin >> new_grade->Grade;
+
+		new_grade->s_NO = new_stu->s_NO;
+		new_grade->c_NO = Course_first->c_NO;
+		new_grade->c_name = Course_first->c_name;
+
+		new_grade->next = Grade_first;
+		Grade_first = new_grade;
+	}
+	new_stu->point = Grade_first;
+	new_stu->next = Stu_first;
+	Stu_first = new_stu;
+
+	Course_first = temp_course_head;
+	Grade_first = NULL;
+}
+
+struct Course *Add_Course() {
+
+	struct Course *new_course = new struct Course;
+
+	printf("Enter new course name:");
+	std::cin >> new_course->c_name;
+	printf("Enter the course's number:");
+	std::cin >> new_course->c_NO;
+
+	new_course->next = Course_first;
+	Course_first = new_course;
+
+	return Course_first;
+}
+
+struct Stu *Update() {
+	string s_NO;
+	string c_NO;
+	printf("Enter student's number:");
+	std::cin >> s_NO;
+
+	printf("Enter subject you want to change(Subject Code):");
+	std::cin >> c_NO;
+
+	struct Stu *temp_student_head=Stu_first;
+	struct Course *temp_course_head = Course_first;
+
+	for (; Stu_first != NULL && Stu_first->s_NO!=s_NO; Stu_first = Stu_first->next);
+	if (Stu_first == NULL) {
+		printf("Student not found!\n");
+		Stu_first = temp_student_head;
+		return Stu_first;
+	}
+	else {
+		struct Gra *grade;
+		for (grade = Stu_first->point; grade->next != NULL && grade->c_NO != c_NO; grade = grade->next);
+		if (grade->next == NULL && grade->c_NO!= c_NO) {
+			for (; Course_first != NULL && Course_first->c_NO != c_NO; Course_first = Course_first->next);
+			if (Course_first == NULL) {
+				printf("Course not found!Please check it again.\n");
+				return NULL;
+			}
+			else {
+				struct Gra *new_grade = new struct Gra;
+
+				std::cout << "Enter " << Course_first->c_name << " grade:";
+				std::cin >> new_grade->Grade;
+
+				new_grade->s_NO = Stu_first->s_NO;
+				new_grade->c_NO = Course_first->c_NO;
+				new_grade->c_name = Course_first->c_name;
+
+				new_grade->next = NULL;
+				grade->next = new_grade;
+			}
+		}
+		else{
+			printf("Enter new grade:");
+			std::cin >> grade->Grade;
+		}
+
+	}
+	Stu_first = temp_student_head;
+	Course_first = temp_course_head;
+
+}
+
+int  Search() {
+
+	if (Stu_first == NULL) {
+		printf("No information found!\n");
+		return 0;
+	}
+	string s_number;
+	string c_number;
+	printf("Enter student number:");
+	std::cin >> s_number;
+	struct Stu *temp_stu_head = Stu_first;
+	while (getchar() != '\n');
+
+	for (; Stu_first != NULL; Stu_first = Stu_first->next) {
+		if (s_number == Stu_first->s_NO) {
+			std::cout << Stu_first->s_name<<endl;
+			for (struct Gra *temp = Stu_first->point; temp != NULL; temp = temp->next) {
+				std::cout << temp->c_name<<"\t\t";
+			}
+			std::cout << endl;
+			for (struct Gra *temp = Stu_first->point; temp != NULL; temp = temp->next) {
+				std::cout << temp->Grade<<"\t\t";
+			}
+			std::cout << endl;
+			break;
+		}
+	}
+	Stu_first = temp_stu_head;
+	return 0;
+}
+
+void Display() {
+	printf("All Student Information:\n");
+	struct Stu *temp_student_head = Stu_first;
+	struct Course *temp_course_head = Course_first;
+	std::cout << "Student name\\Course name\t";
+	for (; temp_course_head != NULL; temp_course_head = temp_course_head->next) {
+		std::cout << temp_course_head->c_name<<"\t";
+	}
+	std::cout << endl;
+	struct Gra *temp_grade_head;
+	for (; temp_student_head != NULL; temp_student_head = temp_student_head->next) {
+		temp_grade_head = Stu_first->point;
+		std::cout << temp_student_head->s_name<<"\t\t\t\t";
+		for (; temp_grade_head != NULL; temp_grade_head = temp_grade_head->next)
+			std::cout << temp_grade_head->Grade << "\t";
+		std::cout << endl;
+	}
+}
+
+void Printout() {
+	std::cout << "Enter a file name:";
+	string filename;
+	std::cin >> filename;
+	std::ofstream new_file(filename);
+	if (!new_file.good()) {
+		std::cout << "Error:Failed to open a file."<<endl;
+		return;
+	}
+
+	new_file<<"Student name\\Course name"<<"\t";
+	for (struct Course *temp_course_head = Course_first; temp_course_head != NULL; temp_course_head = temp_course_head->next) {
+		new_file<<temp_course_head->c_name<<"\t";
+	}
+	new_file << endl;
+	struct Gra *temp_grade_head;
+	for (struct Stu *temp_student_head = Stu_first; temp_student_head != NULL; temp_student_head = temp_student_head->next) {
+		temp_grade_head = Stu_first->point;
+		new_file<<temp_student_head->s_name<<"\t\t\t\t";
+		for (; temp_grade_head != NULL; temp_grade_head = temp_grade_head->next)
+			new_file<<temp_grade_head->Grade<<"\t";
+		new_file << endl;
+	}
+	new_file.close();
+}
