@@ -1,0 +1,73 @@
+#include<iostream>
+#include<string>
+
+using std::cout;
+using std::cin;
+using std::endl;
+using std::string;
+
+void input_data();
+void search();
+
+struct Student{
+	string name;
+	string number;
+	struct Student *next;
+};
+
+struct Student *stu_first=NULL;
+
+int main () {
+	char choice;
+	RESTART:
+	cout<<"Enter process: 1.Input Data 2:Search. q to exit.";
+	cin>>choice;
+	while (getchar()!='\n');
+	switch (choice){
+		case '1':
+			input_data();
+			goto RESTART;
+			break;
+		case '2':
+			search();
+			goto RESTART;
+			break;
+		case 'q':
+			return 0;
+		default:
+			cout<<"Error:Code Incorrect.";
+			goto RESTART;
+	}
+}
+
+void input_data(){
+	struct Student *new_stu = new struct Student;
+	cout<<"Enter student name:";
+	getline(cin,new_stu->name);
+	cout<<"Enter student number:";
+	cin>>new_stu->number;
+	new_stu->next=stu_first;
+	stu_first=new_stu;
+	return;
+}
+
+void search(){
+	if (stu_first == NULL){
+		cout<<"No student information found."<<endl;
+		return;
+	}
+	string name;
+	cout<<"Enter student name you want to search:";
+	getline(cin,name);
+	struct Student *temp_student_head=stu_first;
+	for (;temp_student_head!=NULL && temp_student_head->name != name;temp_student_head=temp_student_head->next);
+	if (temp_student_head == NULL){
+		cout<<"查无此人";
+		return;
+	}
+	else{
+			cout<<"Student name:"<<temp_student_head->name<<endl;
+			cout<<"Student number:"<<temp_student_head->number<<endl;
+			return;
+	}
+}
